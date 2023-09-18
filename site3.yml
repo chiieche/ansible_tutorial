@@ -3,30 +3,30 @@
   become: true
   pre_tasks:
     
-    - name: update repo cache (centos)
+    - name: install updates (centos)
       tags: always
       dnf:
+        update_only: yes
         update_cache: yes
-      changed_when: false
       when: ansible_distribution == "CentOS"
 
 
-    - name: update repo cache (ubuntu)
+    - name: install updates (ubuntu)
       tags: always
       apt:
+        upgrade: dist
         update_cache: yes
-      changed_when: false
       when: ansible_distribution == "Ubuntu"
 
 - hosts: all
   become: true
   tasks:
-
-    - name: add ssh key for simone
+    - name: create simone user
       tags: always
-      authorized_key:
-        user: simone
-        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDS73PZ4ZPCifM0TCCnaVvmovxOMPeSBOKx8MwisHO0P3/v6Tia+5LvSOd1sIplXHQjPjnDhRygISW9U9Olbfdtj3XvWaLTSaUHZPrIgebBpzhd5zcaEgCBwex+uqOs8ny81+hoGfELVN3fvmbaJS86mMjLnGj5XnpJ268AXVLHrNasvxH/xynLPUqOMF3tqC/UTWZyHMzV8fQLsg04wzWnh39rkjEazvUVhr8d1mtn2E4N/vJOeFQXpQLeGo8JdsUd8bSdHEypBP8/Zu7SnHiTpzRhBaOBJv05UoA3wUnCInGjPVVcjdqAqmm6Y1OCkJpnjeMTNqB0hfuudWA8/MVt controlKey"
+      user:
+        name: simone
+        groups: root
+
 
 
 - hosts: workstations
