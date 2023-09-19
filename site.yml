@@ -20,115 +20,29 @@
 
 - hosts: all
   become: true
-  tasks:
-
-    - name: add ssh key for simone
-      tags: always
-      authorized_key:
-        user: simone
-        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDS73PZ4ZPCifM0TCCnaVvmovxOMPeSBOKx8MwisHO0P3/v6Tia+5LvSOd1sIplXHQjPjnDhRygISW9U9Olbfdtj3XvWaLTSaUHZPrIgebBpzhd5zcaEgCBwex+uqOs8ny81+hoGfELVN3fvmbaJS86mMjLnGj5XnpJ268AXVLHrNasvxH/xynLPUqOMF3tqC/UTWZyHMzV8fQLsg04wzWnh39rkjEazvUVhr8d1mtn2E4N/vJOeFQXpQLeGo8JdsUd8bSdHEypBP8/Zu7SnHiTpzRhBaOBJv05UoA3wUnCInGjPVVcjdqAqmm6Y1OCkJpnjeMTNqB0hfuudWA8/MVt controlKey"
+  roles:
+    - base
 
 
 - hosts: workstations
-  become: true
-  tasks:
-
-    - name: install unzip
-      package:
-        name: unzip
-
-    - name: install terraform
-      unarchive:
-        src:  https://releases.hashicorp.com/terraform/0.12.28/terraform_0.12.28_linux_amd64.zip
-        dest: /usr/local/bin
-        remote_src: yes
-        mode: 755
-        owner: root
-        group: root
+  become: yes
+  roles:
+    - workstations
 
 
 - hosts: webservers
   become: yes
-  tasks:
-
-    - name: Install Apache and php in Ubuntu
-      tags: apache,apache2,ubuntu
-      apt:
-        name: 
-          - apache2
-          - libapache2-mod-php
-        state: latest
-      when: ansible_distribution == "Ubuntu"   
-
-        
-    - name: Install Apache and php in Centos
-      tags: apache,httpd,centos
-      dnf:
-        name: 
-          - httpd
-          - php
-        state: latest
-      when: ansible_distribution == "CentOS"  
-
-    - name: start httpd (Centos)
-      tags: apache,centos,httpd
-      service:
-        name: httpd
-        enabled: yes
-        state: started
-      when: ansible_distribution == "CentOS" 
-
-    - name: change e-mail addrress for admin
-      tags: apache,centos,httpd
-      lineinfile:
-        path: /etc/httpd/conf/httpd.conf
-        regexp: '^ServerAdmin'
-        line: ServerAdmin chiieche29@gmail.com
-      when: ansible_distribution == "CentOS" 
-      register: httpd
-
-    - name: restart httpd (Centos)
-      tags: apache,httpd,centos
-      service:
-        name: httpd
-        state: restarted
-      when: httpd.changed
-
-
-    - name: copy default html file for site
-      tags: apache,apache2,httpd
-      copy:
-        src: default_site.html
-        dest: /var/www/html/index.html
-        owner: root
-        group: root
-        mode: 644
+  roles:
+    - webservers
 
 
 - hosts: dbservers
   become: true
-  tasks:
+  roles:
+    - dbservers
     
-    - name: install maraidb packge(centos)
-      tags: mariadb,db,centos
-      dnf: 
-        name: mariadb
-        state: latest
-      when: ansible_distribution == "CentOS" 
-
-    - name: install maraidb packge(ubuntu)
-      tags: mariadb,db,ubuntu
-      apt: 
-        name: mariadb-server
-        state: latest
-      when: ansible_distribution == "Ubuntu"
 
 - hosts: fileservers
   become: true
-  tasks:
-
-    - name: install samba package  
-      tags: samba
-      package:
-        name: samba
-        state: latest
+  roles:
+    - fileservers
